@@ -2,8 +2,7 @@ import tkinter as tk
 from tkinter import messagebox
 import csv
 
-# Simula una "base de datos" de usuarios y sus entradas
-ENTRADAS_FILE = "entradas.csv"  # Debe contener: email,evento,fecha
+ENTRADAS_FILE = "entradas.csv" 
 
 def cargar_entradas(email):
     entradas = []
@@ -37,7 +36,6 @@ def mostrar_entradas(email, entradas):
     for entrada in entradas:
         tk.Label(ventana, text=entrada).pack(anchor='w', padx=20)
 
-# GUI Principal
 root = tk.Tk()
 root.title("Inicio de Sesión - Comprador")
 
