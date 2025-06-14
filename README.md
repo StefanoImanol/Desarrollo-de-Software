@@ -1,4 +1,4 @@
 # Desarrollo-de-Software
 Integrantes
- - Calderon Perez Anthony Alexis
+ - Cisneros Sanchez Jhiro
  
