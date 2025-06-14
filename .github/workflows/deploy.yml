@@ -1,0 +1,59 @@
+name:  Deploy to AWS EKS
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    name: Secure EKS Deployment
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 1
+
+    - name: Configure AWS credentials (OIDC)
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        role-to-assume: arn:aws:iam::<account_id>:role/<github_oidc_role>
+        aws-region: ${{ secrets.AWS_REGION }}
+
+    - name: Set up kubectl
+      uses: azure/setup-kubectl@v3
+      with:
+        version: 'latest'
+
+    - name: Update kubeconfig (temporary)
+      run: |
+        aws eks update-kubeconfig \
+          --name ${{ secrets.EKS_CLUSTER_NAME }} \
+          --region ${{ secrets.AWS_REGION }} \
+          --alias eks-secure
+
+    - name: Build Docker image
+      run: |
+        docker build --no-cache --pull -t my-microservice:latest .
+
+    - name: Authenticate with Amazon ECR
+      run: |
+        aws ecr get-login-password \
+          | docker login \
+            --username AWS \
+            --password-stdin <your-ecr-repo>.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
+
+    - name: Push Docker image to ECR
+      run: |
+        docker tag my-microservice:latest <your-ecr-repo>.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/my-microservice:latest
+        docker push <your-ecr-repo>.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/my-microservice:latest
+
+    - name: Deploy to EKS (read-only, strict context)
+      run: |
+        KUBECONFIG=~/.kube/config \
+        kubectl apply -f k8s/deployment.yaml
