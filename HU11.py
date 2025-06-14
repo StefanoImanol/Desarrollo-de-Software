@@ -1,4 +1,5 @@
 # Simulación de base de datos de eventos
+# hola
 eventos = [
     {"id": 1, "nombre": "Concierto Coldplay", "artista": "Coldplay"},
     {"id": 2, "nombre": "Festival de Jazz Lima", "artista": "Varios"},
